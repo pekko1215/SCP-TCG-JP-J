@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>SCP-TCG-JP-J</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<div id="roomSelect">
+		<h1>対戦相手を選択</h1>
+		<div id="roomList">
+		</div>
+	</div>
+	<div id="game" style="display:none">
+		<div id="gameLeft">
+			<div id="enemmyTales">
+				<div class="card tale"></div>
+				<div class="card tale"></div>
+			</div>
+			<div id="decommissioned">
+				<div class="card blank reverse"></div>
+			</div>
+		</div>
+		<div id="main">
+			<div id="enemmyZone">
+			<div id="enemmyHumanWrap">
+				<div class="card human reverse"></div>
+			</div>
+				<div id="enemmySitesWrap">
+					<div class="card blank reverse"></div>
+					<div class="card blank reverse"></div>
+					<div class="card blank reverse"></div>
+					<div class="card blank reverse"></div>
+					<div class="card blank reverse"></div>
+					<div class="card blank reverse"></div>
+					<div class="card blank reverse"></div>
+				</div>
+			</div>
+			<div id="zone">
+				<div id="sitesWrap">
+					<div class="card">
+						<img src="https://cdn.img-conv.gamerch.com/img.gamerch.com/scptcgjpjwiki/wikidb_img/1510478858.jpg" class="cardImage">
+					</div>
+					<div class="card blank"></div>
+					<div class="card blank"></div>
+					<div class="card blank"></div>
+					<div class="card blank"></div>
+					<div class="card blank"></div>
+					<div class="card blank"></div>
+				</div>
+				<div id="humanWrap">
+					<div class="card human"></div>
+				</div>
+			</div>
+		</div>
+		<div id="gameRight">
+			<div id="enemmyDecommissioned">
+				<div class="card blank reverse"></div>
+			</div>
+			<div id="tales">
+				<div class="card tale"></div>
+				<div class="card tale"></div>
+			</div>
+		</div>
+	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+	<script type="text/javascript" src="./script.js"></script>
+</body>
+</html>
