@@ -34,3 +34,7 @@ socket.on('matched',data=>{
 	console.log('matched',data)
 	initializeBattleUI();
 })
+
+function selectCard(cards,message){
+	
+}

@@ -10,59 +10,24 @@
 		<div id="roomList">
 		</div>
 	</div>
-	<div id="game" style="display:none">
-		<div id="gameLeft">
-			<div id="enemmyTales">
-				<div class="card tale"></div>
-				<div class="card tale"></div>
-			</div>
-			<div id="decommissioned">
-				<div class="card blank reverse"></div>
-			</div>
-		</div>
-		<div id="main">
-			<div id="enemmyZone">
-			<div id="enemmyHumanWrap">
-				<div class="card human reverse"></div>
-			</div>
-				<div id="enemmySitesWrap">
-					<div class="card blank reverse"></div>
-					<div class="card blank reverse"></div>
-					<div class="card blank reverse"></div>
-					<div class="card blank reverse"></div>
-					<div class="card blank reverse"></div>
-					<div class="card blank reverse"></div>
-					<div class="card blank reverse"></div>
-				</div>
-			</div>
-			<div id="zone">
-				<div id="sitesWrap">
-					<div class="card">
-						<img src="https://cdn.img-conv.gamerch.com/img.gamerch.com/scptcgjpjwiki/wikidb_img/1510478858.jpg" class="cardImage">
-					</div>
-					<div class="card blank"></div>
-					<div class="card blank"></div>
-					<div class="card blank"></div>
-					<div class="card blank"></div>
-					<div class="card blank"></div>
-					<div class="card blank"></div>
-				</div>
-				<div id="humanWrap">
-					<div class="card human"></div>
-				</div>
-			</div>
-		</div>
-		<div id="gameRight">
-			<div id="enemmyDecommissioned">
-				<div class="card blank reverse"></div>
-			</div>
-			<div id="tales">
-				<div class="card tale"></div>
-				<div class="card tale"></div>
-			</div>
-		</div>
-	</div>
+	<game></game>
+	<script src="tags/game.tag" type="riot/tag"></script>
+	<script src="tags/card.tag" type="riot/tag"></script>
+	<script src="tags/decommissioned.tag" type="riot/tag"></script>
+	<script src="tags/enemmyDecommissioned.tag" type="riot/tag"></script>
+	<script src="tags/enemmyHuman.tag" type="riot/tag"></script>
+	<script src="tags/enemmySandBox.tag" type="riot/tag"></script>
+	<script src="tags/enemmySite.tag" type="riot/tag"></script>
+	<script src="tags/enemmyTale.tag" type="riot/tag"></script>
+	<script src="tags/human.tag" type="riot/tag"></script>
+	<script src="tags/sandBox.tag" type="riot/tag"></script>
+	<script src="tags/site.tag" type="riot/tag"></script>
+	<script src="tags/tale.tag" type="riot/tag"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
-	<script type="text/javascript" src="./script.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/riot@3.12/riot+compiler.min.js"></script>
+	<!-- <script type="text/javascript" src="./script.js"></script> -->
+	<script type="text/javascript">
+		riot.mount('*')
+	</script>
 </body>
 </html>
