@@ -1,5 +1,12 @@
 var genId = 0;
 
+/*
+yield new GameEventを
+await new GameEventに変更
+それに伴い、GameEventをGameControllerに依存させなければいけない
+
+ */
+
 const dbgMode = true;
 function log(a){
 	if(!dbgMode) return;
@@ -21,7 +28,7 @@ class GameHandler {
 		this.src = src;
 		this.enemmy = sandBox.enemmy;
 	}
-	cancel(){
+	async cancel(){
 		throw 'Effect Cancel';
 	}
 }
@@ -49,7 +56,7 @@ class SandBox{
 			human:this.human,
 			tale:this.tale,
 			site:this.site,
-			decommission:[]
+			decommissioned:[]
 		};
 		this.secure = Object.assign({},this.secureDefault);
 		// this.types.forEach(key=>this[key].forEach(d=>d.sandBox = this))
@@ -70,110 +77,77 @@ class SandBox{
 			this[key] = ret;
 		})
 	}
-	wakeEffect(target){
-		return (function*(){
-		})()
+	triggerEvent(name,arg){
+		return this.sandBox.triggerEvent(name,triggerEvent)
 	}
-	downEffect(target){
-		return (function*(){
-		})()
-	}
-	crossTest(card,target){
-		return (function*(){
+	async wakeEffect(target){
 
-		})()
 	}
-	actionEffect(card){
-		var that = this;
-		return (function*(){
-			var gn = card.action(new GameHandler(that,card,null));
-			var ret;
-			while(true){
-				var tmp = gn.next(ret);
-				ret = yield tmp.value;
-				if(tmp.done)break
-			}
-			for(var val,tmp = that.decommission(card),r = tmp.next();!r.done;r=tmp.next(val)){
-				val = yield r.value;
-			}
-		})()
+	async downEffect(target){
+
 	}
-	decommission(card){
-		var that = this;
-		return (function*(){
-			for(var val,tmp = that.triggerListener('decommission'),r = tmp.next();!r.done;r=tmp.next(val)){
-				val = yield r.value;
-			}
-		})();
+	async crossTest(card,target){
+
+	}
+	async actionEffect(card){
+		await card.action(new GameHandler(this,card,null));
+	}
+	async decommission(card){
+		await this.triggerListener('decommission');
 		card.decommission = true;
-		this.field.find(key=>{
-			this[key] = this[key].filter(c=>c.genId != card.genId);
+		Object.keys(this.field).find(key=>{
+			this[key] = this[key].filter(c=>c).filter(c=>c.genId != card.genId);
 		})
 		this.decommissioned.push(card);
 	}
-	summon(card){
-		var that = this;
+	async summon(card){
 		log(`${card.name}の収容違反`);
-		return (function*(){
-			var idx = yield GameEvent.SelectBlankSite();
-			if(idx == -1){
-				yield GameEvent.KClassScenario('NK');
-				return
-			}
-			log(`サイト${idx}が選択`);
-			log(`自身の収容違反時効果`);
-			for(var val,tmp = that.triggerListener('mySummon',card),r = tmp.next();!r.done;r=tmp.next(val)){
-				val = yield r.value;
-			}
-			log(`相手の収容違反時効果`);
-			for(var val,tmp = that.triggerListener('enemmySummon',card),r = tmp.next();!r.done;r=tmp.next(val)){
-				val = yield r.value;
-			}
-			card.decommissioned = false;
-			that.site[idx] = card;
-			if(card.summon){
-				log(`収容違反時効果の発動`);
-				for(var val,tmp = card.summon(new GameHandler(that,card,'site')),r = tmp.next();!r.done;r=tmp.next(val)){
-					val = yield r.value;
-				}
-			}
-		})()
+		var idx = await this.triggerEvent(GameEvent.SelectBlankSite());
+		if(idx == -1){
+			return await this.triggerEvent(GameEvent.KClassScenario('NK'));
+		}
+		log(`サイト${idx}が選択`);
+		log(`自身の収容違反時効果`);
+		await this.triggerListener('mySummon',card)
+		log(`相手の収容違反時効果`);
+		await this.triggerListener('enemmySummon',card)
+		card.decommissioned = false;
+		this.site[idx] = card;
+		if(card.summon){
+			log(`収容違反時効果の発動`);
+			await card.summon(new GameHandler(this,card,'site'));
+		}
 	}
-	damage(target,value){
-		var that = this;
+	async damage(target,value){
 		log(`${target}に対する${value}のダメージ`)
-		return (function*(){
-			that.secure[target] -= value;
-			log(`確保力減算処理`);
-			log(that.secure);
-			if(that.secure[target] <= 0){
-				log(`${target}による収容違反発生`)
-				that.secure[target] = that.secureDefault[target];
-				if(that[target].length == 0){
-					yield new GameHandler.KClassScenario('ZK');
-				}
-				for(var val,tmp = that.summon(that[target].pop()),r = tmp.next();!r.done;r=tmp.next(val)){
-					val = yield r.value;
-				}
+		this.secure[target] -= value;
+		log(`確保力減算処理`);
+		log(this.secure);
+		if(this.secure[target] <= 0){
+			log(`${target}による収容違反発生`)
+			this.secure[target] = this.secureDefault[target];
+			if(this[target].length == 0){
+				return await this.triggerEvent(GameEvent.KClassScenario('ZK'));
 			}
-		})()
+			await this.summon(this[target].pop());
+		}
 	}
-	effectSummon(card){
-		this.summon(card);
+	async weffectSummon(card){
+		return await this.summon(card);
 	}
-	changeCost(card,val){
+	async changeCost(card,val){
 		card.cost += val;
 		if(card.cost<0){
 			card.cost = 0;
 		}
 	}
-	changeProtect(card,val){
+	async changeProtect(card,val){
 		card.protect += val;
 		if(card.protect<0){
 			card.protect = 0;
 		}
 	}
-	triggerListener(key,src){
+	async triggerListener(key,src){
 		var box = this;
 		if(/enemmy/.test(key)){
 			box = this.enemmy;
@@ -184,16 +158,12 @@ class SandBox{
 			}))
 			return a;
 		},[]);
-		return (function*(){
-			for(var card of cards){
-				if(!card.card[key])break;
-				for(var e of card.card[key](new GameHandler(box,src,card.place))){
-					yield e;
-				}
-			}
-		})()
+		for(var card of cards){
+			if(!card.card[key])break;
+			await card.card[key](new GameHandler(box,src,card.place))
+		}
 	}
-	findAndMove(card,target,arg){
+	async findAndMove(card,target,arg){
 		Object.keys(this.field).find(key=>{
 			var idx = this[key].findIndex(c=>c.genId == card.genId);
 			if(idx == -1) return;
@@ -242,12 +212,16 @@ class SandBox{
 			}
 		}
 	}
+	async triggerEvent(gameEvent){
+		console.log(`triggerEventメソッドをオーバーライドしてください。`,gameEvent);
+		return null;
+	}
 }
 
 class GameEvent {
 	constructor(name,arg){
 		this.name = name;
-		this.arg = arg;
+		this.arg = arg
 	}
 	static Confirm(text){
 		return new this('confirm',text);
@@ -270,8 +244,11 @@ class GameEvent {
 	}
 	static KClassScenario(type){
 		throw {
-			type:'KClassScenario',
-			message:type
+			name:'KClassScenario',
+			message:type,
+			toString(){
+				return `Kクラスシナリオ-${type}が発生`
+			}
 		}
 	}
 	static SelectAction(){
@@ -283,25 +260,19 @@ class GameEvent {
 
 class GameControler {
 	constructor(sand1,sand2){
-		return this.newGame(sand1,sand2)
+		// this.newGame(sand1,sand2)
 	}
-	newGame(sand1,sand2){
-		var that = this;
+	async newGame(sand1,sand2){
 		this.init(sand1,sand2);
 		var sands = [sand1,sand2];
-		return (function*(){
-			yield 'start'
-			for(var val,tmp = that.Turn(sand1,sand2),r = tmp.next();!r.done;r=tmp.next(val)){
-				val = yield r.value;
-			}
-			var val;
-			var tmp = that.Turn(sand2,sand1);
+		try{
 			while(true){
-				var r = tmp.next(val);
-				val = yield r.value;
-				if(r.done)break;
+				await this.Turn(sand1,sand2);
+				await this.Turn(sand2,sand1);
 			}
-		})();
+		}catch(e){
+			console.log(e)
+		}
 	}
 	init(s1,s2){
 		s1.shuffle();
@@ -311,46 +282,28 @@ class GameControler {
 		s1.enemmy = s2;
 		s2.enemmy = s1;
 	}
-	Turn(me,target){
-		return (function*(){
-			// 自身のターン前効果処理
-			for(var val,tmp = me.wakeEffect(me),r = tmp.next();!r.done;r=tmp.next(val)){
-				val = yield r.value;
+	async Turn(me,target){
+		// 自身のターン前効果処理
+		await me.wakeEffect(me);
+		await me.enemmy.wakeEffect(me);
+		while(true){
+			var card = await me.triggerEvent(GameEvent.SelectAction());
+			if(!card) break;
+			switch(card.type){
+				case 'object':
+					if(card.tested) break;
+					var target = await me.triggerEvent(new GameEvent('select',{target:['site']}));
+					await me.crossTest(card,target);
+					break;
+				case 'human':
+				case 'tale':
+					await me.actionEffect(card);
+					break;
 			}
-			// 相手のターン前効果処理
-			for(var val,tmp = me.enemmy.wakeEffect(me),r = tmp.next();!r.done;r=tmp.next(val)){
-				val = yield r.value;
-			}
-			var tested = false;
-			// 行動
-			while(true){
-				var card = yield GameEvent.SelectAction();
-				if(!card) break;
-				switch(card.type){
-					case 'object':
-						if(card.tested) break;
-						var target = yield new GameEvent('select',{target:['site']});
-						for(var e of me.crossTest(card,target)){
-							yield e;
-						}
-						break;
-					case 'human':
-					case 'tale':
-						for(var val,tmp = me.actionEffect(card),r = tmp.next();!r.done;r=tmp.next(val)){
-							val = yield r.value;
-						}
-						break;
-				}
-			}
-			// 自身のターン終了効果処理
-			for(var e of me.downEffect(me.enemmy)){
-				yield e;
-			}
-			// 相手のターン終了効果処理
-			for(var e of me.enemmy.downEffect(me)){
-				yield e;
-			}
-		})()
+		}
+		// 自身のターン終了効果処理
+		await me.downEffect(me.enemmy);
+		await me.enemmy.downEffect(me);
 	}
 }
 
