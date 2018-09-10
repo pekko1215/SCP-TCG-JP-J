@@ -4,6 +4,7 @@ var name = prompt();
 var userData = {name};
 var sandBox = null;
 var matching = false;
+const observer = riot.observable();
 
 socket.emit('regist',name,(data)=>{
 	userData.id = data.id;
@@ -12,7 +13,6 @@ socket.emit('regist',name,(data)=>{
 		e.innerText = d.name;
 		e.addEventListener('click',()=>{
 			socket.emit('match',d.id);
-			initializeBattleUI();
 		})
 		document.getElementById('roomList').appendChild(e);
 	})
@@ -21,20 +21,26 @@ socket.emit('regist',name,(data)=>{
 function initializeBattleUI(){
 	var k = document.getElementById('roomSelect');
 	k.style.display = 'none';
-	document.getElementById('game').style.display = '';
+	// document.getElementById('game').style.display = '';
+	riot.mount('*')
+	observer.trigger('refresh')
 }
 
 
 socket.on('initData',(data,fn)=>{
 	sandBox = data;
+	initializeBattleUI();
 	fn();
 })
-
 socket.on('matched',data=>{
-	console.log('matched',data)
-	initializeBattleUI();
+	// initializeBattleUI();
 })
 
-function selectCard(cards,message){
-	
-}
+socket.on('event',({gameEvent,box},cb)=>{
+	sandBox = box;
+	console.log(gameEvent)
+	observer.trigger('refresh')
+	window.cb = function(resp){
+		cb(resp)
+	}
+})

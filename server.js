@@ -48,14 +48,55 @@ function match(u1,u2){
 	u1.sandBox = new SandBox(cards,cards.safe[0]);
 	cards = require('./testdeck.js')();
 	u2.sandBox = new SandBox(cards,cards.safe[0]);
-	var gameControler = new GameControler(u1.sandBox,u2.sandBox);
-	console.log(u1.sandBox.toSendData())
+	var gameControler = new GameControler();
+
+	u1.sandBox.triggerEvent = function(gameEvent){
+		return new Promise(r=>{
+			u1.socket.emit('event',{gameEvent,box:u1.sandBox.toSendData()},(data)=>{
+				r(responseParser.call(u1.sandBox,data))
+			})
+		})
+	}
+	u2.sandBox.triggerEvent = function(gameEvent){
+		return new Promise(r=>{
+			u2.socket.emit('event',{gameEvent,box:u2.sandBox.toSendData()},(data)=>{
+				r(responseParser.call(u2.sandBox,data))
+			})
+		})
+	}
+	gameControler.newGame(u1.sandBox,u2.sandBox);
+
 	Promise.all([
 		new Promise(r=>u1.socket.emit('initData',u1.sandBox.toSendData(),r)),
 		new Promise(r=>u2.socket.emit('initData',u2.sandBox.toSendData(),r))
 	]).then(d=>{
-		console.log("nyan")
+		
 	})
 }
 
 http.listen(8808)
+
+function responseParser(resp){
+	switch(resp.type){
+		case 'select':
+			var current = this;
+			var ret;
+			(function fn(value){
+				switch(true){
+					case typeof value === 'object':
+						current = current[Object.keys(value)[0]];
+						fn(value[Object.keys(value)[0]])
+					break
+					case typeof value === 'number':
+						ret = current[value];
+				}
+			})(resp.value);
+			return ret;
+		break
+		case 'confirm':
+			return resp.value;
+			break
+		default:
+			return resp
+	}
+}

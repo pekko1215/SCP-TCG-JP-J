@@ -71,5 +71,8 @@
 		position:absolute;
 		bottom:5vw;
 	}
+	enemmySandBox,site{
+		height:50%;
+	}
 	</style>
 </game>

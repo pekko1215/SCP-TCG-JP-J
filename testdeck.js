@@ -5,30 +5,30 @@ var pool = require('./cards/card1.js');
 module.exports = () => {
     return {
         safe: [
-            pool[0](),
-            pool[0](),
-            pool[0](),
-            pool[0](),
-            pool[0](),
-            pool[0](),
-            pool[0]()
+            new pool[0](),
+            new pool[0](),
+            new pool[0](),
+            new pool[0](),
+            new pool[0](),
+            new pool[0](),
+            new pool[0]()
         ],
         euclid: [
-            pool[1](),
-            pool[1](),
-            pool[1](),
-            pool[1]()
+            new pool[1](),
+            new pool[1](),
+            new pool[1](),
+            new pool[1]()
         ],
         keter: [
-            pool[2](),
-            pool[2]()
+            new pool[2](),
+            new pool[2]()
         ],
         tale: [
-            pool[5](),
-            pool[5]()
+            new pool[5](),
+            new pool[5]()
         ],
         human: [
-            pool[4]()
+            new pool[4]()
         ],
     }
 }
